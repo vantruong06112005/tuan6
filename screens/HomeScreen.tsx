@@ -10,6 +10,8 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import type { HomeStackParamList } from '../navigation/HomeStack';
+import { useCart } from '../store/cartStore';
+import FloatingCartButton from '../components/FloatingCartButton';
 
 type Props = NativeStackScreenProps<
   HomeStackParamList,
@@ -43,9 +45,19 @@ const books: Book[] = [
 export default function HomeScreen({
   navigation,
 }: Props) {
+  const { addToCart } = useCart();
+
   const handleBookPress = (bookId: string) => {
     navigation.navigate('BookDetail', {
       bookId,
+    });
+  };
+
+  const handleAddToCart = (book: Book) => {
+    addToCart({
+      bookId: book.id,
+      title: book.title,
+      price: book.price,
     });
   };
 
@@ -56,28 +68,34 @@ export default function HomeScreen({
         onPress={() => handleBookPress(item.id)}
         activeOpacity={0.7}
       >
-        <Text style={styles.title}>
-          {item.title}
-        </Text>
+        <Text style={styles.title}>{item.title}</Text>
 
         <Text style={styles.price}>
           {item.price.toLocaleString('vi-VN')}đ
         </Text>
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => handleAddToCart(item)}
+        >
+          <Text style={styles.addButtonText}>+ Giỏ hàng</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>
-        Sách nổi bật
-      </Text>
+      <Text style={styles.heading}>Sách nổi bật</Text>
 
       <FlatList
         data={books}
         keyExtractor={(item) => item.id}
         renderItem={renderBook}
+        contentContainerStyle={styles.list}
       />
+
+      <FloatingCartButton onPress={() => navigation.navigate('CartMain')} />
     </View>
   );
 }
@@ -95,6 +113,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  list: {
+    paddingBottom: 120,
+  },
+
   card: {
     backgroundColor: '#FFFFFF',
     padding: 16,
@@ -110,6 +132,20 @@ const styles = StyleSheet.create({
   price: {
     marginTop: 8,
     color: '#FF6B35',
+    fontWeight: '700',
+  },
+
+  addButton: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+
+  addButtonText: {
+    color: '#FFF',
     fontWeight: '700',
   },
 });
