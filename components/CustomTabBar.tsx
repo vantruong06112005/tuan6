@@ -7,8 +7,8 @@ import {
 } from 'react-native';
 
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCart } from '../store/useCart';
 
 const TAB_CONFIG = {
   Home: {
@@ -35,6 +35,7 @@ export default function CustomTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { totalQuantity } = useCart();
 
   return (
     <View
@@ -48,6 +49,7 @@ export default function CustomTabBar({
       {state.routes.map((route, index) => {
         // Tab đang được chọn
         const isFocused = state.index === index;
+        const isCart = route.name === 'Cart';
 
         // Lấy config của tab
         const config =
@@ -92,6 +94,14 @@ export default function CustomTabBar({
               >
                 {config?.icon}
               </Text>
+
+              {isCart && totalQuantity > 0 && (
+                <View style={styles.tabBadge}>
+                  <Text style={styles.tabBadgeText}>
+                    {totalQuantity > 99 ? '99+' : totalQuantity}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* LABEL */}
@@ -114,48 +124,55 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
-
     paddingTop: 8,
   },
-
   tab: {
     flex: 1,
-
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   iconBox: {
     width: 40,
     height: 30,
-
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
-
   activeIconBox: {
     backgroundColor: '#FFF0E6',
     borderRadius: 10,
   },
-
   icon: {
     fontSize: 20,
     color: '#777777',
   },
-
   activeIcon: {
     color: '#FF6B35',
   },
-
+  tabBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  tabBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
   label: {
     marginTop: 3,
     fontSize: 11,
     color: '#777777',
   },
-
   activeLabel: {
     color: '#FF6B35',
     fontWeight: '600',

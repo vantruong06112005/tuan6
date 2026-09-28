@@ -7,45 +7,23 @@ import {
   StyleSheet,
 } from 'react-native';
 
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 import type { HomeStackParamList } from '../navigation/HomeStack';
-import { useCart } from '../store/cartStore';
+import type { MainTabParamList } from '../navigation/MainTabNavigator';
+import { useCart } from '../store/useCart';
 import FloatingCartButton from '../components/FloatingCartButton';
+import { BOOKS, Book } from '../data/books';
 
-type Props = NativeStackScreenProps<
-  HomeStackParamList,
-  'HomeMain'
+type Props = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, 'HomeMain'>,
+  BottomTabScreenProps<MainTabParamList>
 >;
 
-type Book = {
-  id: string;
-  title: string;
-  price: number;
-};
-
-const books: Book[] = [
-  {
-    id: 'book-001',
-    title: 'Đắc Nhân Tâm',
-    price: 86000,
-  },
-  {
-    id: 'book-002',
-    title: 'Nhà Giả Kim',
-    price: 79000,
-  },
-  {
-    id: 'book-003',
-    title: 'Tuổi Trẻ Đáng Giá Bao Nhiêu',
-    price: 90000,
-  },
-];
-
-export default function HomeScreen({
-  navigation,
-}: Props) {
-  const { addToCart } = useCart();
+export default function HomeScreen({ navigation }: Props) {
+  const { addToCart, getItemQuantity } = useCart();
 
   const handleBookPress = (bookId: string) => {
     navigation.navigate('BookDetail', {
@@ -62,24 +40,38 @@ export default function HomeScreen({
   };
 
   const renderBook = ({ item }: { item: Book }) => {
+    const qtyInCart = getItemQuantity(item.id);
+
     return (
       <TouchableOpacity
         style={styles.card}
         onPress={() => handleBookPress(item.id)}
         activeOpacity={0.7}
       >
-        <Text style={styles.title}>{item.title}</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.author}>{item.author}</Text>
+        </View>
 
-        <Text style={styles.price}>
-          {item.price.toLocaleString('vi-VN')}đ
+        <Text style={styles.description} numberOfLines={2}>
+          {item.description}
         </Text>
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => handleAddToCart(item)}
-        >
-          <Text style={styles.addButtonText}>+ Giỏ hàng</Text>
-        </TouchableOpacity>
+        <View style={styles.cardFooter}>
+          <Text style={styles.price}>
+            {item.price.toLocaleString('vi-VN')}đ
+          </Text>
+
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => handleAddToCart(item)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.addButtonText}>
+              + Giỏ hàng {qtyInCart > 0 ? `(${qtyInCart})` : ''}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -89,13 +81,14 @@ export default function HomeScreen({
       <Text style={styles.heading}>Sách nổi bật</Text>
 
       <FlatList
-        data={books}
+        data={BOOKS}
         keyExtractor={(item) => item.id}
         renderItem={renderBook}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
       />
 
-      <FloatingCartButton onPress={() => navigation.navigate('CartMain')} />
+      <FloatingCartButton onPress={() => navigation.navigate('Cart')} />
     </View>
   );
 }
@@ -106,46 +99,65 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#F8F8F8',
   },
-
   heading: {
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 16,
+    color: '#222',
   },
-
   list: {
     paddingBottom: 120,
   },
-
   card: {
     backgroundColor: '#FFFFFF',
     padding: 16,
     marginBottom: 12,
     borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
+  cardHeader: {
+    marginBottom: 6,
+  },
   title: {
     fontSize: 17,
     fontWeight: '600',
+    color: '#111',
   },
-
+  author: {
+    fontSize: 13,
+    color: '#777',
+    marginTop: 2,
+  },
+  description: {
+    fontSize: 13,
+    color: '#555',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   price: {
-    marginTop: 8,
+    fontSize: 16,
     color: '#FF6B35',
     fontWeight: '700',
   },
-
   addButton: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
     backgroundColor: '#FF6B35',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
   },
-
   addButtonText: {
     color: '#FFF',
     fontWeight: '700',
+    fontSize: 13,
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 
-import { useCart } from '../store/cartStore';
+import { useCart } from '../store/useCart';
 
 type Props = {
   onPress?: () => void;
@@ -13,14 +13,16 @@ export default function FloatingCartButton({ onPress }: Props) {
   return (
     <TouchableOpacity
       style={styles.button}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
       onPress={onPress}
     >
       <Text style={styles.icon}>🛒</Text>
 
       {totalQuantity > 0 && (
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{totalQuantity}</Text>
+          <Text style={styles.badgeText}>
+            {totalQuantity > 99 ? '99+' : totalQuantity}
+          </Text>
         </View>
       )}
     </TouchableOpacity>
@@ -31,26 +33,26 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     right: 20,
-    bottom: 100,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    bottom: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#FF6B35',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
+    elevation: 8,
+    shadowColor: '#FF6B35',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
   },
   icon: {
-    fontSize: 24,
+    fontSize: 26,
     color: '#FFF',
   },
   badge: {
     position: 'absolute',
-    top: -6,
+    top: -4,
     right: -4,
     minWidth: 22,
     height: 22,
@@ -58,11 +60,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: '#FFF',
   },
   badgeText: {
     color: '#FFF',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });
